@@ -35,15 +35,7 @@ export function getBaseAuthSchema({
         item: ${listKey}!
       }
       type ${gqlNames.ItemAuthenticationWithPasswordFailure} {
-        code: PasswordAuthErrorCode!
         message: String!
-      }
-      enum PasswordAuthErrorCode {
-        FAILURE
-        IDENTITY_NOT_FOUND
-        SECRET_NOT_SET
-        MULTIPLE_IDENTITY_MATCHES
-        SECRET_MISMATCH
       }
     `,
     resolvers: {
@@ -74,7 +66,11 @@ export function getBaseAuthSchema({
               itemPlural: list.adminUILabels.plural,
               code: result.code,
             });
-            return { code: result.code, message };
+            // We log the failure mode to the console, but do not
+            // expose this info via the graphQL interface.
+            // FIXME: Need to consider how to do server logging in general.
+            console.log({ code: result.code, message, identity: args[identityField] });
+            return { message: 'Authentication failed.' };
           }
 
           // Update system state
